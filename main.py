@@ -25,10 +25,10 @@ def allow_cross_origin_requests():
         allow_headers=["*"],
     )
 
+allow_cross_origin_requests()
+
 @app.get("/users/me/", response_model=User)
 async def read_users_me(
     current_user: Annotated[User, Depends(token.get_current_active_user)]):
     return current_user
 
-if __name__ == "__main__":
-    allow_cross_origin_requests()
