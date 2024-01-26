@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import timedelta
 
-from .user import authenticate_user, get_user, save_refresh_token, is_refresh_token_active, delete_refresh_token, refresh_token_get_all # ToDo
 from .jwt import LoginToken, Token, create_access_token, create_refresh_token, decode_access_token, decode_refresh_token
+from business_logic.database.tables import user as bl_user, refresh_token as bl_refresh_token
 
-from database.model_dto import User
+from business_logic.database.model_dto import User, RefreshToken as BL_RefreshToken
 
 router = APIRouter(
     prefix="/login",
@@ -23,7 +23,7 @@ class RefreshToken(BaseModel):
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
     ) -> LoginToken:
-    user = authenticate_user(form_data.username, form_data.password)
+    user = bl_user.authenticate(form_data.username, form_data.password)
 
     if not user:
         raise HTTPException(
@@ -32,11 +32,12 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token(data={"sub": str(user.id)})
+    check_and_delete_refresh_tokens(user.id)
 
-    check_refresh_tokens(user.id)
+    access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
-    save_refresh_token(user_id=user.id, token=refresh_token)
+
+    bl_refresh_token.save(user_id=user.id, token=refresh_token)
 
     return LoginToken(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
@@ -52,7 +53,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     if not user_id:
         raise credentials_exception
 
-    user = get_user(user_id)
+    user = bl_user.get(user_id)
 
     if not user:
         raise credentials_exception
@@ -76,22 +77,39 @@ async def refresh_token(data: RefreshToken):
     )
 
     user_id = decode_refresh_token(data.refresh_token)
-    is_active = is_refresh_token_active(user_id=user_id, token=data.refresh_token)
+    is_active = bl_refresh_token.is_active(user_id=user_id, token=data.refresh_token)
 
     if is_active:
         access_token = create_access_token(data={"sub": str(user_id)})
         return Token(access_token=access_token, token_type="bearer")
     try:
-        delete_refresh_token(data.refresh_token)
+        bl_refresh_token.delete(data.refresh_token)
     except:
         pass
 
     return credentials_exception
 
-def check_refresh_tokens(user_id: int):
-    tokens = refresh_token_get_all(user_id)
+def check_and_delete_refresh_tokens(user_id: int):
+    tokens = bl_refresh_token.get_all(user_id)
 
     for i in tokens:
         result = decode_refresh_token(i.token)
         if not result:
-            delete_refresh_token(i.token)
+            bl_refresh_token.delete(i.token)
+
+
+@router.get("/get")
+async def get_all_refresh_tokens(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    data: RefreshToken) -> list[BL_RefreshToken]:
+    tokens = bl_refresh_token.get_all_for_user(current_user.id, data.refresh_token)
+    return tokens
+
+class Choice(BaseModel):
+    tokens: list[int]
+
+@router.post("/delete")
+async def delete(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    data: Choice) -> list[int]:
+    return bl_refresh_token.delete_many(data.tokens)

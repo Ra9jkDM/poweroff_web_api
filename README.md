@@ -7,6 +7,8 @@ Api for web-angular project
     source .venv/bin/activate
     export $(cat .env)
 
+    python -m database.model # create db
+
     uvicorn main:app --reload
     http://127.0.0.1:8000/docs
 

@@ -24,3 +24,19 @@ def delete(db, token: str):
     db.delete(token)
     db.commit()
 
+@session
+def delete_many(db, tokens: list[int]):
+    deleted = []
+
+    for i in tokens:
+        try:
+            token = db.query(RefreshToken).filter(RefreshToken.id==i).first()
+            db.delete(token)
+            db.commit()
+            
+            deleted.append(i)
+        except:
+            pass
+
+    return deleted
+

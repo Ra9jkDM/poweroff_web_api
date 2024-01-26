@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, Float, String, Date, ForeignKey, select, Boolean
+from sqlalchemy import create_engine, Column, Integer, Float, String, Date, DateTime, ForeignKey, select, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, Session, relationship, mapped_column, Mapped, relationship, backref
 
 from security.hash import hash_password
@@ -39,15 +39,18 @@ class RefreshToken(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, primary_key=True)
     
     token: Mapped[String] = mapped_column(String(1000), nullable=False)
-    creation_date: Mapped[Date] = mapped_column(Date, nullable=False)
+    creation_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
 
     user: Mapped["User"] = relationship("User", back_populates="refresh_tokens")
+
+
 
 def create_user(username, password):
     with Session(autoflush=True, bind=ENGINE) as db:
         user = User(username=username, password=hash_password(password))
         db.add(user)
         db.commit()
+
 
 
 def create_db():
@@ -61,3 +64,5 @@ if __name__ == "__main__":
     # delete_db()
     create_db()
     create_user("bob", "pwd123")
+
+# python -m database.model
