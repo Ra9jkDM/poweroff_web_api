@@ -1,0 +1,4 @@
+
+
+# /power/shutdown
+# /power/reboot

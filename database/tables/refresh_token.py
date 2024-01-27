@@ -25,12 +25,12 @@ def delete(db, token: str):
     db.commit()
 
 @session
-def delete_many(db, tokens: list[int]):
+def delete_many(db, user_id: int, tokens: list[int]):
     deleted = []
 
     for i in tokens:
         try:
-            token = db.query(RefreshToken).filter(RefreshToken.id==i).first()
+            token = db.query(RefreshToken).filter(RefreshToken.user_id==user_id, RefreshToken.id==i).first()
             db.delete(token)
             db.commit()
             

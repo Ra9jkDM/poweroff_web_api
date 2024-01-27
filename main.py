@@ -4,12 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 
 import security.token as token
+import routers.user as user
 
 from business_logic.database.model_dto import User
 
 app = FastAPI()
 
 app.include_router(token.router)
+app.include_router(user.router)
 
 def allow_cross_origin_requests():
     origins = [
@@ -26,9 +28,4 @@ def allow_cross_origin_requests():
     )
 
 allow_cross_origin_requests()
-
-@app.get("/users/me/", response_model=User)
-async def read_users_me(
-    current_user: Annotated[User, Depends(token.get_current_active_user)]):
-    return current_user
 

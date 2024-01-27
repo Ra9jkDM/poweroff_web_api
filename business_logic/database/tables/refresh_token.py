@@ -8,8 +8,8 @@ def save(user_id: int, token: str):
 def delete(token: str):
     refresh_token.delete(token)
 
-def delete_many(tokens: list[int]):
-    return refresh_token.delete_many(tokens)
+def delete_many(user_id: int, tokens: list[int]):
+    return refresh_token.delete_many(user_id, tokens)
 
 def is_active(user_id: str, token: str):
     token = refresh_token.get(int(user_id), token)

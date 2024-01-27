@@ -112,4 +112,4 @@ class Choice(BaseModel):
 async def delete(
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: Choice) -> list[int]:
-    return bl_refresh_token.delete_many(data.tokens)
+    return bl_refresh_token.delete_many(current_user.id, data.tokens)
