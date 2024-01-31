@@ -98,7 +98,7 @@ def check_and_delete_refresh_tokens(user_id: int):
             bl_refresh_token.delete(i.token)
 
 
-@router.get("/get")
+@router.post("/get")
 async def get_all_refresh_tokens(
     current_user: Annotated[User, Depends(get_current_active_user)],
     data: RefreshToken) -> list[BL_RefreshToken]:

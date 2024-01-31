@@ -16,11 +16,11 @@ async def reboot(
     os.system("echo rebooting...")
     return True
 
-# @router.get("/shutdown")
-# async def shutdown(
-#     current_user: Annotated[User, Depends(token.get_current_active_user)]):
-    
-#     return True
+@router.get("/shutdown")
+async def shutdown(
+    current_user: Annotated[User, Depends(token.get_current_active_user)]):
+    os.system("echo shutdown...")
+    return True
 
 # /create
 # /delete
