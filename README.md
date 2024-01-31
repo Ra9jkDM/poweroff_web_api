@@ -23,6 +23,12 @@ All routes are registered in ```main.py```/
     uvicorn main:app --reload
     # http://127.0.0.1:8000/docs
 
+Default user: <br>
+Login: **bob**<br>
+Password: **pwd123**
+
+Can change login and password in ```database/model.py```(create_user("LOGIN", "PASSWORD")) file, before creating db.
+
 
 # Gen keys
 
