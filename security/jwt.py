@@ -13,7 +13,7 @@ PUBLIC_KEY=get_public_key()
 REFRESH_TOKEN_ALGORITHM="RS256"
 
 ACCESS_TOKEN_EXPIRE_MINUTES = timedelta(minutes=1)#5)
-REFRESH_TOKEN_EXPIRE_MINUTES = timedelta(minutes=2)#60 * 24 * 7)
+REFRESH_TOKEN_EXPIRE_MINUTES = timedelta(minutes=60)#60 * 24 * 7)
 
 class LoginToken(BaseModel):
     access_token: str

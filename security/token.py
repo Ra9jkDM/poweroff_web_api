@@ -87,7 +87,7 @@ async def refresh_token(data: RefreshToken):
     except:
         pass
 
-    return credentials_exception
+    raise credentials_exception
 
 def check_and_delete_refresh_tokens(user_id: int):
     tokens = bl_refresh_token.get_all(user_id)
